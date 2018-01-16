@@ -1,21 +1,12 @@
 # Hedge
 
-**TODO: Add description**
+Percy/GitHub integration to update GitHub pull request statuses without granting
+Percy full read/write access to your repositories.
 
-## Installation
+This runs as a server that listens for GitHub pull request and push webhooks,
+polls the Percy API for build status based on the received SHAs, and updates
+the GitHub API with corresponding status updates.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `hedge` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:hedge, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/hedge](https://hexdocs.pm/hedge).
-
+Hedge has no external service dependencies, just run the server with
+`mix run --no-halt`. (This means there is no persistence, so you will probably
+need to override occasional builds if you let the server go down.)

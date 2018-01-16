@@ -14,6 +14,8 @@ defmodule Hedge.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Hedge.Supervisor]
+    IO.puts("hedge running on port 4000")
+
     Supervisor.start_link(children, opts)
   end
 end
