@@ -1,6 +1,7 @@
 defmodule Hedge.Application do
   @moduledoc false
 
+  require Logger
   use Application
 
   def start(_type, _args) do
@@ -18,9 +19,9 @@ defmodule Hedge.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Hedge.Supervisor]
-    IO.puts("hedge running on port 4000")
-    IO.puts("percy project is #{System.get_env("PERCY_PROJECT")}")
-    IO.puts("percy api key is #{System.get_env("PERCY_API_KEY")}")
+    Logger.info "hedge running on port 4000"
+    Logger.info "percy project is #{System.get_env("PERCY_PROJECT")}"
+    Logger.info "percy api key is #{System.get_env("PERCY_API_KEY")}"
 
     Supervisor.start_link(children, opts)
   end

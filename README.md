@@ -7,6 +7,9 @@ This runs as a server that listens for GitHub pull request and push webhooks,
 polls the Percy API for build status based on the received SHAs, and updates
 the GitHub API with corresponding status updates.
 
+You must have a *read* API key from Percy for the poller to work. This is not
+available in the UI, so contact their support for such a key.
+
 ## Setup
 Hedge has no external service dependencies, just run the server with
 `mix run --no-halt`. (This means there is no persistence, so you will probably

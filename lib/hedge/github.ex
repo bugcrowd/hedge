@@ -1,6 +1,8 @@
 defmodule Hedge.Github do
+  require Logger
+
   def ping(payload) do
-    IO.puts("zen: #{payload["zen"]}")
+    Logger.debug "zen: #{payload["zen"]}"
   end
 
   def pull_request(payload) do
@@ -9,25 +11,25 @@ defmodule Hedge.Github do
     branch = payload["pull_request"]["head"]["label"]
 
     # TODO: remove conditional
-    cond do
-      branch == "bugcrowd:webhook-test" && action == "opened" ->
+    case action do
+      "opened" ->
         opened(sha)
-      branch == "bugcrowd:webhook-test" && action == "synchronize" ->
+      "synchronize" ->
         synchronize(sha)
       true ->
-        IO.puts "#{sha}: unsupported action: #{action}"
+        Logger.warn "#{sha}: unsupported action: #{action}"
     end
   end
 
   defp opened(sha) do
-    IO.puts "#{sha}: pull request opened"
+    Logger.debug "#{sha}: pull request opened"
 
     Hedge.Percy.commit(sha)
   end
 
   # github-speak for pull request branch update with new HEAD
   defp synchronize(sha) do
-    IO.puts "#{sha}: pull request synchronized"
+    Logger.debug "#{sha}: pull request synchronized"
 
     Hedge.Percy.commit(sha)
   end

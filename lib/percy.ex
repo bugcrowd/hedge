@@ -15,7 +15,7 @@ defmodule Percy do
   end
 
   defp attributes(response) do
-    json = response.body
+    response.body
     |> IO.iodata_to_binary
     |> Poison.decode!
     |> Map.get("data")

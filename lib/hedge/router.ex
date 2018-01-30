@@ -1,4 +1,5 @@
 defmodule Hedge.Router do
+  require Logger
   use Plug.Router
 
   plug Plug.Logger, log: :debug
@@ -12,12 +13,12 @@ defmodule Hedge.Router do
 
   post "/hooks" do
     type = Plug.Conn.get_req_header(conn, "x-github-event")
-    IO.puts("event: #{type}")
+    Logger.debug "webhook event: #{type}"
 
     case hd(type) do
       "ping"         -> Hedge.Github.ping(conn.body_params)
       "pull_request" -> Hedge.Github.pull_request(conn.body_params)
-      _              -> IO.puts("unsupported webhook event: #{type}")
+      _              -> Logger.warn "unsupported webhook event: #{type}"
     end
 
     Plug.Conn.send_resp(conn, 201, "")
