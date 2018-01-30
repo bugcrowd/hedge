@@ -10,13 +10,12 @@ defmodule Hedge.Github do
     sha = payload["pull_request"]["head"]["sha"]
     branch = payload["pull_request"]["head"]["label"]
 
-    # TODO: remove conditional
     case action do
       "opened" ->
         opened(sha)
       "synchronize" ->
         synchronize(sha)
-      true ->
+      _ ->
         Logger.warn "#{sha}: unsupported action: #{action}"
     end
   end
