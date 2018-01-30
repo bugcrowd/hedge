@@ -2,9 +2,7 @@ defmodule Hedge.Router do
   use Plug.Router
 
   plug Plug.Logger, log: :debug
-  plug Plug.Parsers,
-    parsers: [:json],
-    json_decoder: Poison
+  plug Plug.Parsers, parsers: [:json], json_decoder: Poison
   plug :match
   plug :dispatch
 
