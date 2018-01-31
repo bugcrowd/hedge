@@ -1,87 +1,43 @@
 defmodule Hedge.Percy do
   require Logger
-
-  @polling_freq 15_000
+  use GenServer
+  alias Hedge.PercyPoller
 
   def start_polling(sha) do
+    GenServer.cast(:percy, {:start, sha})
+  end
+
+  def stop_polling(sha) do
+    GenServer.cast(:percy, {:stop, sha})
+  end
+
+  ##
+
+  def start_link() do
+    GenServer.start_link(__MODULE__, :ok, name: :percy)
+  end
+
+  def init(:ok) do
+    {:ok, %{}}
+  end
+
+  def handle_cast({:start, sha}, map) do
     pid =
       Task.async(fn ->
         # TODO: abandon the polling after a while
-        poll(sha)
+        PercyPoller.poll(sha)
 
         Logger.debug("#{sha}: polling complete")
       end)
 
-    # TODO: persist the pid of the polling task here
+    {:noreply, Map.put(map, sha, pid)}
   end
 
-  def stop_polling(sha) do
-    Logger.debug("#{sha}: we're supposed to stop polling now")
+  def handle_cast({:stop, sha}, map) do
+    Logger.debug("#{sha}: stopping poll")
 
-    # Task.async(fn ->
-    #   poll(sha)
-    # end)
-  end
+    Process.exit(Map.get(map, sha), "stopping poll")
 
-  defp poll(sha) do
-    :timer.sleep(@polling_freq)
-
-    {status, data} = PercyClient.poll(sha)
-
-    case status do
-      :ok -> parse_response(sha, data)
-      :err -> Logger.warn("#{sha}: error: #{data}")
-    end
-  end
-
-  defp parse_response(sha, data) when is_nil(data) do
-    Logger.debug("#{sha}: no builds yet")
-
-    poll(sha)
-  end
-
-  defp parse_response(sha, data) do
-    attrs = data["attributes"]
-    state = attrs["state"]
-    review_state = attrs["review-state"]
-    build = attrs["build-number"]
-    percy_url = attrs["web-url"]
-
-    cond do
-      state == "finished" && review_state == "approved" ->
-        Logger.debug("#{sha}: build #{build} is approved")
-
-        Hedge.Github.update_status(
-          sha,
-          "success",
-          "Percy build ##{build} has been approved",
-          percy_url
-        )
-
-      state == "finished" || state == "pending" ->
-        Logger.debug("#{sha}: build #{build} is #{review_state}")
-
-        Hedge.Github.update_status(
-          sha,
-          "pending",
-          "Percy build ##{build} is pending approval",
-          percy_url
-        )
-
-        poll(sha)
-
-      true ->
-        Logger.debug("#{sha}: build #{build} is in an unknown state")
-
-        Logger.debug(
-          "#{sha}: state is #{state}, review state is #{review_state}"
-        )
-
-        Hedge.Github.update_status(
-          sha,
-          "error",
-          "Percy (or this integration) encountered an error"
-        )
-    end
+    {:noreply, Map.delete(map, sha)}
   end
 end

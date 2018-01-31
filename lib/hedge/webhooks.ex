@@ -36,11 +36,9 @@ defmodule Hedge.Webhooks do
     Hedge.Percy.stop_polling(sha)
   end
 
-  # github-speak for pull request branch update with new HEAD
   defp handle_pull_request_synchronized(sha) do
     Logger.debug("#{sha}: pull request synchronized")
 
-    # TODO: stop_polling for previous SHA
     Hedge.Percy.start_polling(sha)
   end
 end
