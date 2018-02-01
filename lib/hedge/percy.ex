@@ -22,21 +22,25 @@ defmodule Hedge.Percy do
   end
 
   def handle_cast({:start, sha}, map) do
-    pid =
+    task =
       Task.async(fn ->
-        # TODO: abandon the polling after a while
         PercyPoller.poll(sha)
 
-        Logger.debug("#{sha}: polling complete")
+        Logger.info("#{sha}: polling complete")
       end)
 
-    {:noreply, Map.put(map, sha, pid)}
+    {:noreply, Map.put(map, sha, task.pid)}
   end
 
   def handle_cast({:stop, sha}, map) do
-    Logger.debug("#{sha}: stopping poll")
+    Logger.info("#{sha}: stopping poll")
 
-    Process.exit(Map.get(map, sha), "stopping poll")
+    pid = Map.get(map, sha)
+
+    unless is_nil(pid) do
+      Logger.warn("#{sha}: killing process")
+      Process.exit(pid, "stopping poll")
+    end
 
     {:noreply, Map.delete(map, sha)}
   end

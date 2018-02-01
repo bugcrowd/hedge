@@ -25,19 +25,19 @@ defmodule Hedge.Webhooks do
   end
 
   defp handle_pull_request_opened(sha) do
-    Logger.debug("#{sha}: pull request opened")
+    Logger.info("#{sha}: pull request opened")
 
     Hedge.Percy.start_polling(sha)
   end
 
   defp handle_pull_request_closed(sha) do
-    Logger.debug("#{sha}: pull request closed")
+    Logger.info("#{sha}: pull request closed")
 
     Hedge.Percy.stop_polling(sha)
   end
 
   defp handle_pull_request_synchronized(sha) do
-    Logger.debug("#{sha}: pull request synchronized")
+    Logger.info("#{sha}: pull request synchronized")
 
     Hedge.Percy.start_polling(sha)
   end
