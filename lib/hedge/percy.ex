@@ -11,6 +11,10 @@ defmodule Hedge.Percy do
     GenServer.cast(:percy, {:stop, sha})
   end
 
+  def get_processes do
+    GenServer.call(:percy, {:get})
+  end
+
   ##
 
   def start_link() do
@@ -19,6 +23,10 @@ defmodule Hedge.Percy do
 
   def init(:ok) do
     {:ok, %{}}
+  end
+
+  def handle_call({:get}, _, map) do
+    {:reply, Map.keys(map), map}
   end
 
   def handle_cast({:start, sha}, map) do

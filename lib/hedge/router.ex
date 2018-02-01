@@ -9,7 +9,7 @@ defmodule Hedge.Router do
   plug(:dispatch)
 
   get "/" do
-    Plug.Conn.send_resp(conn, 200, "")
+    Plug.Conn.send_resp(conn, 200, Poison.encode!(Hedge.Percy.get_processes()))
   end
 
   post "/hooks" do
