@@ -10,6 +10,31 @@ the GitHub API with corresponding status updates.
 You must have a *read* API key from Percy for the poller to work. This is not
 available in the UI, so contact their support for such a key.
 
+@dradford made this sick diagram of how it works.
+
+```
+      GitHub PR / push ----> Hedge ---> Percy
+                          
+                         Hedge ---> Percy  
+                              <---              
+                             |             
+     GitHub SHA pending  <----             
+
+  ^---------------------------------------->
+  |                                        |
+  |                      Hedge ---> Percy  |
+  |                            <---        |
+  |                               |        |
+  |   GitHub API status check <----        |
+  |                                        |
+  <----------------------------------------v
+                      
+                         Hedge ---> Percy
+                               <---        
+                              |            
+ GitHub API SHA success  <----             
+```
+
 ## Setup
 Hedge has no external service dependencies, just run the server with
 `mix run --no-halt`. (This means there is no persistence, so you will probably
