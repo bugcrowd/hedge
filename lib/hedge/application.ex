@@ -17,7 +17,7 @@ defmodule Hedge.Application do
         :http,
         Hedge.Router,
         [],
-        port: 4000
+        port: System.get_env("PORT") || 4000
       )
     ]
 
