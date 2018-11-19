@@ -13,12 +13,7 @@ defmodule Hedge.Application do
 
     children = [
       worker(Hedge.Percy, []),
-      Plug.Adapters.Cowboy.child_spec(
-        :http,
-        Hedge.Router,
-        [],
-        port: System.get_env("PORT") || 4000
-      )
+      Plug.Cowboy.child_spec(scheme: :http, plug: Hedge.Router, options: [port: System.get_env("PORT") || 4000])
     ]
 
     opts = [strategy: :one_for_one, name: Hedge.Supervisor]
