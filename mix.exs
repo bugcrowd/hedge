@@ -6,9 +6,8 @@ defmodule Hedge.Mixfile do
       app: :hedge,
       version: "0.1.0",
       elixir: "~> 1.5",
-      deps: deps(),
       start_permanent: Mix.env == :prod,
-      build_embedded: Mix.env == :prod
+      deps: deps()
     ]
   end
 

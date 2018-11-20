@@ -25,7 +25,7 @@ defmodule Hedge.Application do
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: Hedge.Router,
-        options: [port: port]
+        options: [port: port || 4000]
       )
     ]
 
