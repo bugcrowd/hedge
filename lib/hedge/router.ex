@@ -17,11 +17,17 @@ defmodule Hedge.Router do
   plug(:dispatch)
 
   post "/hooks" do
-    verify_webhook(:percy, conn)
-    type = Plug.Conn.get_req_header(conn, "x-percy-event")
+    unless Webhooks.valid_digest?(
+      hd(Plug.Conn.get_req_header(conn, "x-percy-digest")),
+      conn.assigns[:raw_body]
+    ) do
+      Plug.Conn.send_resp(conn, 403, "")
+    end
+
+    type = hd(Plug.Conn.get_req_header(conn, "x-percy-event"))
     Logger.info("webhook event: #{type}")
 
-    response = case hd(type) do
+    response = case type do
       "ping" -> Webhooks.handle_ping(conn.body_params)
       "build_created" -> Webhooks.handle_build_created(conn.body_params)
       "build_approved" -> Webhooks.handle_build_approved(conn.body_params)
@@ -38,16 +44,6 @@ defmodule Hedge.Router do
 
   match _ do
     Plug.Conn.send_resp(conn, 404, "")
-  end
-
-  defp verify_webhook(namespace, conn) do
-    digest = hd(Plug.Conn.get_req_header(conn, "x-#{namespace}-digest"))
-    raw_body = conn.assigns[:raw_body]
-    hash = :crypto.hmac(:sha256, System.get_env("PERCY_WEBHOOK_SECRET"), raw_body) |> Base.encode16 |> String.downcase
-
-    unless hash == digest do
-      Plug.Conn.send_resp(conn, 403, "")
-    end
   end
 end
 

@@ -2,6 +2,12 @@ defmodule Hedge.Webhooks do
   require Logger
   alias Hedge.Github
 
+  def valid_digest?(digest, raw_body) do
+    hash = :crypto.hmac(:sha256, System.get_env("PERCY_WEBHOOK_SECRET"), raw_body) |> Base.encode16 |> String.downcase
+    
+    hash == digest
+  end
+
   def handle_ping(payload) do
     Logger.info("handle ping: #{inspect(payload)}")
   end
