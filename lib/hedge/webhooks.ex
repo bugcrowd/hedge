@@ -1,44 +1,63 @@
 defmodule Hedge.Webhooks do
   require Logger
+  alias Hedge.Github
 
   def handle_ping(payload) do
-    Logger.debug("zen: #{payload["zen"]}")
+    Logger.info("handle ping: #{inspect(payload)}")
   end
 
-  def handle_pull_request(payload) do
-    action = payload["action"]
-    sha = payload["pull_request"]["head"]["sha"]
+  def handle_build_created(payload) do
+    Logger.info("handle_build_created: #{inspect(payload)}")
+    
+    Github.update_status(
+      metadata(payload)[:sha],
+      "pending",
+      "Percy build ##{metadata(payload)[:build]} is processing",
+      metadata(payload)[:url]
+    )
+  end
+  
+  def handle_build_approved(payload) do
+    Logger.info("handle_build_approved: #{inspect(payload)}")
+    
+    Github.update_status(
+      metadata(payload)[:sha],
+      "success",
+      "Percy build ##{metadata(payload)[:build]} has been approved",
+      metadata(payload)[:url]
+    )
+  end
+  
+  def handle_build_finished(payload) do
+    Logger.info("handle_build_finished: #{inspect(payload)}")
 
-    case action do
-      "opened" ->
-        handle_pull_request_opened(sha)
+    Github.update_status(
+      metadata(payload)[:sha],
+      "failure",
+      "Percy build ##{metadata(payload)[:build]} requires approval",
+      metadata(payload)[:url]
+    )
+  end
 
-      "closed" ->
-        handle_pull_request_closed(sha)
+  defp metadata(payload) do
+    builds = payload["included"] |> Enum.find(fn s -> s["type"] == "builds" end)
 
-      "synchronize" ->
-        handle_pull_request_synchronized(sha)
-
-      _ ->
-        Logger.warn("#{sha}: unsupported action: #{action}")
+    unless builds["attributes"]["branch"] == "test-percy-build" do
+      raise "unsupported branch"
     end
-  end
 
-  defp handle_pull_request_opened(sha) do
-    Logger.info("#{sha}: pull request opened")
+    commits = payload["included"] |> Enum.find(fn s -> s["type"] == "commits" end)
+    
+    metadata = %{ 
+      build: payload["data"]["relationships"]["build"]["data"]["id"],
+      url: builds["attributes"]["web-url"],
+      sha: commits["attributes"]["sha"]
+    }
 
-    Hedge.Percy.start_polling(sha)
-  end
+    Logger.info("builds: #{inspect(builds)}")
+    Logger.info("commits: #{inspect(commits)}")
+    Logger.info("metadata: #{inspect(metadata)}")
 
-  defp handle_pull_request_closed(sha) do
-    Logger.info("#{sha}: pull request closed")
-
-    Hedge.Percy.stop_polling(sha)
-  end
-
-  defp handle_pull_request_synchronized(sha) do
-    Logger.info("#{sha}: pull request synchronized")
-
-    Hedge.Percy.start_polling(sha)
+    metadata
   end
 end
