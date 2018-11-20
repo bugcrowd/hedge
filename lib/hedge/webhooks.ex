@@ -3,8 +3,11 @@ defmodule Hedge.Webhooks do
   alias Hedge.Github
 
   def valid_digest?(digest, raw_body) do
-    hash = :crypto.hmac(:sha256, System.get_env("PERCY_WEBHOOK_SECRET"), raw_body) |> Base.encode16 |> String.downcase
-    
+    hash =
+      :crypto.hmac(:sha256, System.get_env("PERCY_WEBHOOK_SECRET"), raw_body)
+      |> Base.encode16()
+      |> String.downcase()
+
     hash == digest
   end
 
@@ -14,7 +17,7 @@ defmodule Hedge.Webhooks do
 
   def handle_build_created(payload) do
     Logger.info("handle_build_created: #{inspect(payload)}")
-    
+
     Github.update_status(
       metadata(payload)[:sha],
       "pending",
@@ -22,10 +25,10 @@ defmodule Hedge.Webhooks do
       metadata(payload)[:url]
     )
   end
-  
+
   def handle_build_approved(payload) do
     Logger.info("handle_build_approved: #{inspect(payload)}")
-    
+
     Github.update_status(
       metadata(payload)[:sha],
       "success",
@@ -33,7 +36,7 @@ defmodule Hedge.Webhooks do
       metadata(payload)[:url]
     )
   end
-  
+
   def handle_build_finished(payload) do
     Logger.info("handle_build_finished: #{inspect(payload)}")
 
@@ -52,9 +55,10 @@ defmodule Hedge.Webhooks do
       raise "unsupported branch"
     end
 
-    commits = payload["included"] |> Enum.find(fn s -> s["type"] == "commits" end)
-    
-    metadata = %{ 
+    commits =
+      payload["included"] |> Enum.find(fn s -> s["type"] == "commits" end)
+
+    metadata = %{
       build: payload["data"]["relationships"]["build"]["data"]["id"],
       url: builds["attributes"]["web-url"],
       sha: commits["attributes"]["sha"]
