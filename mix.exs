@@ -20,7 +20,8 @@ defmodule Hedge.Mixfile do
 
   defp deps do
     [
-      {:plug_cowboy, "~> 2.0"},
+      {:cowboy, "~> 1.1.2"},
+      {:plug, "~> 1.3.5"},
       {:poison, "~> 3.1.0"},
       {:envy, "~> 1.1.1"},
       {:httpotion, "~> 3.0.2"}
