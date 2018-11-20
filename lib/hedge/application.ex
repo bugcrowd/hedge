@@ -11,10 +11,22 @@ defmodule Hedge.Application do
       Envy.load([".env"])
     end
 
-    port = System.get_env("PORT") || 4000
+    port =
+      case System.get_env("PORT") do
+        # default port
+        port when is_binary(port) ->
+          String.to_integer(port)
+
+        nil ->
+          nil
+      end
 
     children = [
-      Plug.Cowboy.child_spec(scheme: :http, plug: Hedge.Router, options: [port: port])
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: Hedge.Router,
+        options: [port: port]
+      )
     ]
 
     Logger.info("Hedge running on port #{port}")
@@ -22,6 +34,10 @@ defmodule Hedge.Application do
     Logger.info("Github repo is #{System.get_env("GITHUB_REPO")}")
     Logger.info("Github user is #{System.get_env("GITHUB_USER")}")
 
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(
+      children,
+      strategy: :one_for_one,
+      name: Hedge.Supervisor
+    )
   end
 end
