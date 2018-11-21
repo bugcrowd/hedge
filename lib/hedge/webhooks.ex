@@ -51,10 +51,6 @@ defmodule Hedge.Webhooks do
   defp metadata(payload) do
     builds = payload["included"] |> Enum.find(fn s -> s["type"] == "builds" end)
 
-    unless builds["attributes"]["branch"] == "test-percy-build" do
-      raise "unsupported branch"
-    end
-
     commits =
       payload["included"] |> Enum.find(fn s -> s["type"] == "commits" end)
 
