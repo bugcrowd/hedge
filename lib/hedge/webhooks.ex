@@ -40,21 +40,29 @@ defmodule Hedge.Webhooks do
   def handle_build_finished(payload) do
     Logger.info("handle_build_finished: #{inspect(payload)}")
 
-    Github.update_status(
-      metadata(payload)[:sha],
-      "success",
-      "Percy build ##{metadata(payload)[:build]} has been approved",
-      metadata(payload)[:url]
-    )
-
     total_comparisons_diff = payload["data"]["attributes"]["total-comparisons-diff"]
 
     Logger.info("total comparisons: #{inspect(total_comparisons_diff)}")
 
     case total_comparisons_diff do
-      nil -> Logger.warn("nil changes #{inspect(total_comparisons_diff)}")
-      0 -> Logger.warn("0 changes #{inspect(total_comparisons_diff)}")
-      _ -> Logger.warn("nonzero changes #{inspect(total_comparisons_diff)}")
+      nil -> Github.update_status(
+            metadata(payload)[:sha],
+            "success",
+            "Percy build ##{metadata(payload)[:build]} has been approved",
+            metadata(payload)[:url]
+          )
+      0 -> Github.update_status(
+            metadata(payload)[:sha],
+            "success",
+            "Percy build ##{metadata(payload)[:build]} has been approved",
+            metadata(payload)[:url]
+          )
+      _ -> Github.update_status(
+            metadata(payload)[:sha],
+            "failure",
+            "Percy build ##{metadata(payload)[:build]} requires approval",
+            metadata(payload)[:url]
+          )
     end
   end
 
