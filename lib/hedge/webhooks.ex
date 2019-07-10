@@ -47,12 +47,14 @@ defmodule Hedge.Webhooks do
       metadata(payload)[:url]
     )
 
-    Logger.info("total comparisons: #{inspect(payload["attributes"]["total-comparisons-diff"])}")
+    total_comparisons_diff = payload["data"]["attributes"]["total-comparisons-diff"]
 
-    case payload["attributes"]["total-comparisons-diff"] do
-      nil -> Logger.warn("nil changes #{inspect(payload["attributes"]["total-comparisons-diff"])}")
-      0 -> Logger.warn("0 changes #{inspect(payload["attributes"]["total-comparisons-diff"])}")
-      _ -> Logger.warn("nonzero changes #{inspect(payload["attributes"]["total-comparisons-diff"])}")
+    Logger.info("total comparisons: #{inspect(total_comparisons_diff)}")
+
+    case total_comparisons_diff do
+      nil -> Logger.warn("nil changes #{inspect(total_comparisons_diff)}")
+      0 -> Logger.warn("0 changes #{inspect(total_comparisons_diff)}")
+      _ -> Logger.warn("nonzero changes #{inspect(total_comparisons_diff)}")
     end
   end
 
