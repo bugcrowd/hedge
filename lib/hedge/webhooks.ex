@@ -42,7 +42,7 @@ defmodule Hedge.Webhooks do
 
     Github.update_status(
       metadata(payload)[:sha],
-      "failure",
+      "success",
       "Percy build ##{metadata(payload)[:build]} requires approval",
       metadata(payload)[:url]
     )
